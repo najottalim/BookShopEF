@@ -20,9 +20,7 @@ public class GenericRepository<TSource> : IGenericRepository<TSource> where TSou
     public async Task<TSource> CreateAsync(TSource source)
     {
         var entry = await _dbSet.AddAsync(source);
-
-        await _dbContext.SaveChangesAsync();
-
+        
         return entry.Entity;
     }
 
