@@ -26,15 +26,11 @@ public class GenericRepository<TSource> : IGenericRepository<TSource> where TSou
         return entry.Entity;
     }
 
-    public Task<TSource> UpdateAsync(int id, TSource source)
-    {
-        throw new NotImplementedException();
-    }
+    public Task<TSource> UpdateAsync(TSource source) 
+        => Task.FromResult(_dbSet.Update(source).Entity);
 
-    public Task DeleteAsync(TSource source)
-    {
-        throw new NotImplementedException();
-    }
+    public void DeleteRange(IEnumerable<TSource> sources) 
+        => _dbSet.RemoveRange(sources);
 
     public Task<TSource?> GetAsync(Expression<Func<TSource, bool>> expression)
         => _dbSet.FirstOrDefaultAsync(expression);
