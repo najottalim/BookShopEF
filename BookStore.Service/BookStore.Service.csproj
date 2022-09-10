@@ -7,9 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="DTOs" />
-      <Folder Include="Mappers" />
-      <Folder Include="Services" />
+      <ProjectReference Include="..\BookStore.Data\BookStore.Data.csproj" />
+      <ProjectReference Include="..\BookStore.Domain\BookStore.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="11.0.1" />
     </ItemGroup>
 
 </Project>
