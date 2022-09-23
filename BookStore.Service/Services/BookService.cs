@@ -22,25 +22,20 @@ public class BookService : IBookService
     private readonly BookStoreDbContext _dbContext;
     private readonly IMapper _mapper;
     
-    public BookService()
+    public BookService(BookStoreDbContext dbContext, IMapper mapper)
     {
-        _dbContext = new BookStoreDbContext();
+        _dbContext = dbContext;
         _bookRepository = new BookRepository(_dbContext);
         _publisherRepository = new GenericRepository<Publisher>(_dbContext);
-        
-        _mapper = new Mapper(new MapperConfiguration(c =>
-        {
-            c.AddProfile<MapperProfile>();
-        }));
+
+        _mapper = mapper;
     }
     
     public async Task<Book> CreateAsync(BookForCreationDto dto)
     {
         var publisher = await _publisherRepository.GetAsync(publisher => publisher.Id == dto.PublisherId);
         if (publisher is null)
-        {
             throw new Exception("Publisher not found");
-        }
 
         var mapped = _mapper.Map<Book>(dto);
         mapped.Isbn = Guid.NewGuid();
@@ -57,9 +52,7 @@ public class BookService : IBookService
         var book = await _bookRepository.GetAsync(book => book.Id == id && book.State != ItemState.Deleted);
 
         if (book is null)
-        {
             throw new Exception("Book not found!");
-        }
 
         if (!string.IsNullOrEmpty(dto.Title)) 
             book.Title = dto.Title;
@@ -86,9 +79,7 @@ public class BookService : IBookService
         var books = _bookRepository.GetAll(expression).Where(p => p.State != ItemState.Deleted);
 
         if (!books.Any())
-        {
             throw new Exception("Book not found!");
-        }
 
         _bookRepository.DeleteRange(books);
         await _dbContext.SaveChangesAsync();
@@ -102,7 +93,8 @@ public class BookService : IBookService
     public Task<IEnumerable<Book>> GetAllAsync(Expression<Func<Book, bool>>? expression = null,
         PaginationParameters? parameters = null)
     {
-        return Task.FromResult(_bookRepository.GetAll(expression).Where(p => p.State != ItemState.Deleted)
+        return Task.FromResult(_bookRepository.GetAll(expression, false)
+            .Where(p => p.State != ItemState.Deleted)
             .ToPaged(parameters));
     }
 }

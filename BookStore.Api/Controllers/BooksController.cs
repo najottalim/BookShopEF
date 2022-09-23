@@ -1,37 +1,39 @@
 using BookStore.Domain.Entites.Books;
 using BookStore.Service.DTOs.Books;
 using BookStore.Service.Interfaces;
-using BookStore.Service.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.Api.Controllers;
 
 [ApiController, Route("api/books")]
-public class BooksController
+public class BooksController : ControllerBase
 {
     private readonly IBookService _bookService;
 
-    public BooksController()
+    public BooksController(IBookService bookService)
     {
-        _bookService = new BookService();
+        _bookService = bookService;
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<Book?> Get([FromRoute]int id)
+    {
+        return await _bookService.GetAsync(book => book.Id == id);
     }
     
     [HttpGet]
-    public async Task<IEnumerable<Book>> GetAll()
+    public async Task<IEnumerable<Book>> GetAll([FromQuery]int? year, [FromQuery] int? publisherId)
     {
+        if (year is null && publisherId is not null)
+            return await _bookService.GetAllAsync(book => book.PublisherId == publisherId);
+
+        if(publisherId is null && year is not null)
+            return await _bookService.GetAllAsync(book => book.PublishYear == year);
+
+        if (publisherId is not null && year is not null)
+            return await _bookService.GetAllAsync(book => book.PublisherId == publisherId && book.PublishYear == year);
+        
         return await _bookService.GetAllAsync();
-    }
-    
-    [HttpGet("year")]
-    public async Task<IEnumerable<Book>> GetAllByYear(int year)
-    {
-        return await _bookService.GetAllAsync(book => book.PublishYear == year);
-    }
-    
-    [HttpGet("publisher")]
-    public async Task<IEnumerable<Book>> GetAllByPublisher(int publisherId)
-    {
-        return await _bookService.GetAllAsync(book => book.PublisherId == publisherId);
     }
 
     [HttpPost]
@@ -41,17 +43,16 @@ public class BooksController
     }
 
     [HttpDelete]
-    public async Task<bool> Delete(int id)
+    public async Task<IActionResult> Delete([FromQuery]int? id, [FromQuery] int? year)
     {
-        return await _bookService.DeleteAsync(book => book.Id == id);
-    }
+        if (id is null && year is null)
+            return BadRequest("Need to provide any parameter to delete");
 
-    [HttpDelete("by-year")]
-    public async Task<bool> DeleteByYear(int year)
-    {
-        return await _bookService.DeleteAsync(book => book.PublishYear == year);
+        return id is not null
+            ? Ok(await _bookService.DeleteAsync(book => book.Id == id))
+            : Ok(await _bookService.DeleteAsync(book => book.PublishYear == year));
     }
-
+    
     [HttpPatch]
     public async Task<Book> Update(int id, BookForUpdateDto bookForUpdateDto)
     {
