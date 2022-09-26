@@ -87,8 +87,12 @@ public class BookService : IBookService
         return true;
     }
 
-    public Task<Book?> GetAsync(Expression<Func<Book, bool>> expression)
-        => _bookRepository.GetAsync(expression);
+    public async Task<Book?> GetAsync(Expression<Func<Book, bool>> expression)
+    {
+        var book = await _bookRepository.GetAsync(expression);
+        
+        return book != null && book.State != ItemState.Deleted ? book : null;
+    }
 
     public Task<IEnumerable<Book>> GetAllAsync(Expression<Func<Book, bool>>? expression = null,
         PaginationParameters? parameters = null)
