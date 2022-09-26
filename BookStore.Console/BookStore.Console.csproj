@@ -8,7 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BookStore.Data\BookStore.Data.csproj" />
+      <ProjectReference Include="..\BookStore.Service\BookStore.Service.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
 
 </Project>

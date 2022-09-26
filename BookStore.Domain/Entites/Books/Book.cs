@@ -16,7 +16,7 @@ public class Book : Auditable
     
     public int PublisherId { get; set; }
     [ForeignKey(nameof(PublisherId))] 
-    public Publisher Publisher { get; set; }
+    public Publisher? Publisher { get; set; }
     
     public Guid Isbn { get; set; }
     public int Price { get; set; }

@@ -1,15 +1,24 @@
-﻿
+﻿using System;
 using BookStore.Data.DbContexts;
 using BookStore.Data.IRepositories;
 using BookStore.Data.Repositories;
-using BookStore.Domain.Entites.Users;
+using BookStore.Domain.Entites.Publishers;
 using BookStore.Domain.Enums;
 
 var dbContext = new BookStoreDbContext();
 
-IGenericRepository<User> userRepository = new GenericRepository<User>(dbContext);
+IGenericRepository<Publisher> repository = new GenericRepository<Publisher>(dbContext);
+//
+// await repository.CreateAsync(new Publisher
+// {
+//     CreatedAt = DateTime.UtcNow, Name = "XalqSo'zi", State = ItemState.Created
+// });
+//
+// await dbContext.SaveChangesAsync();
 
-foreach (var user in userRepository.GetAll(p => p.Id > 1))
+await repository.CreateAsync(new Publisher()
 {
-    Console.WriteLine($"{user.Id} {user.FirstName}");
-}
+    CreatedAt = DateTime.UtcNow, Name = "Darakchi", State = ItemState.Created
+});
+
+await dbContext.SaveChangesAsync();

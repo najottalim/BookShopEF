@@ -33,6 +33,10 @@ public class GenericRepository<TSource> : IGenericRepository<TSource> where TSou
     public Task<TSource?> GetAsync(Expression<Func<TSource, bool>> expression)
         => _dbSet.FirstOrDefaultAsync(expression);
 
-    public IQueryable<TSource> GetAll(Expression<Func<TSource, bool>>? expression = null)
-        => expression is null ? _dbSet : _dbSet.Where(expression);
+    public IQueryable<TSource> GetAll(Expression<Func<TSource, bool>>? expression = null, bool isTracking = true)
+    {
+        var sources = expression is null ? _dbSet : _dbSet.Where(expression);
+
+        return isTracking ? sources : sources.AsNoTracking();
+    }
 }
