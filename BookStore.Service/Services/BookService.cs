@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Net;
 using AutoMapper;
 using BookStore.Data.DbContexts;
 using BookStore.Data.IRepositories;
@@ -8,6 +9,7 @@ using BookStore.Domain.Entites.Books;
 using BookStore.Domain.Entites.Publishers;
 using BookStore.Domain.Enums;
 using BookStore.Service.DTOs.Books;
+using BookStore.Service.Exceptions;
 using BookStore.Service.Extensions;
 using BookStore.Service.Interfaces;
 using BookStore.Service.Mappers;
@@ -17,7 +19,7 @@ namespace BookStore.Service.Services;
 public class BookService : IBookService
 {
     private readonly IBookRepository _bookRepository;
-    private readonly IGenericRepository<Publisher> _publisherRepository;
+    private readonly IPublisherRepository _publisherRepository;
     
     private readonly BookStoreDbContext _dbContext;
     private readonly IMapper _mapper;
@@ -26,7 +28,7 @@ public class BookService : IBookService
     {
         _dbContext = dbContext;
         _bookRepository = new BookRepository(_dbContext);
-        _publisherRepository = new GenericRepository<Publisher>(_dbContext);
+        _publisherRepository = new PublisherRepository(_dbContext);
 
         _mapper = mapper;
     }
@@ -35,7 +37,7 @@ public class BookService : IBookService
     {
         var publisher = await _publisherRepository.GetAsync(publisher => publisher.Id == dto.PublisherId);
         if (publisher is null)
-            throw new Exception("Publisher not found");
+            throw new HttpStatusCodeException(HttpStatusCode.NotFound, "Publisher not found");
 
         var mapped = _mapper.Map<Book>(dto);
         mapped.Isbn = Guid.NewGuid();
@@ -52,7 +54,7 @@ public class BookService : IBookService
         var book = await _bookRepository.GetAsync(book => book.Id == id && book.State != ItemState.Deleted);
 
         if (book is null)
-            throw new Exception("Book not found!");
+            throw new HttpStatusCodeException(HttpStatusCode.NotFound, "Book not found!");
 
         if (!string.IsNullOrEmpty(dto.Title)) 
             book.Title = dto.Title;
@@ -79,7 +81,7 @@ public class BookService : IBookService
         var books = _bookRepository.GetAll(expression).Where(p => p.State != ItemState.Deleted);
 
         if (!books.Any())
-            throw new Exception("Book not found!");
+            throw new HttpStatusCodeException(HttpStatusCode.NotFound, "Book not found!");
 
         _bookRepository.DeleteRange(books);
         await _dbContext.SaveChangesAsync();

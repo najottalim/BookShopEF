@@ -11,7 +11,7 @@ public class Order : Auditable
     
     public int UserId { get; set; }
     [ForeignKey(nameof(UserId))]
-    public User User { get; set; }  
+    public User? User { get; set; }  
     
     public OrderState OrderState { get; set; }
 }

@@ -10,7 +10,7 @@ public class OrderDetails : Auditable
 
     public int BookId { get; set; }
     [ForeignKey(nameof(BookId))]
-    public Book Book { get; set; }
+    public Book? Book { get; set; }
 
     public int Count { get; set; }
 }
