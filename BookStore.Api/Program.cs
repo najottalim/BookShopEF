@@ -1,14 +1,16 @@
 using BookStore.Data.DbContexts;
+using BookStore.Service.Helpers;
 using BookStore.Service.Interfaces;
 using BookStore.Service.Mappers;
 using BookStore.Service.Middlewares;
 using BookStore.Service.Services;
 using Microsoft.EntityFrameworkCore;
+using Telegram.Bot;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("HerokuPostgres");
-
+var botToken = builder.Configuration.GetSection("TelegramBotToken")["Production"];
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -24,7 +26,10 @@ builder.Services.AddSwaggerGen();
 // Custom Services
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
-builder.Services.AddAutoMapper(expression => expression.AddProfile<MapperProfile>());
+builder.Services.AddSingleton<ITelegramBotClient, TelegramBotClient>(c =>
+    new TelegramBotClient(botToken));
+builder.Services.AddAutoMapper(typeof(MapperProfile));
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 var app = builder.Build();
 
@@ -34,6 +39,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+HttpContextHelper.Accessor = app.Services.GetRequiredService<IHttpContextAccessor>();
 
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
