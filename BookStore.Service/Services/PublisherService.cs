@@ -61,6 +61,6 @@ public class PublisherService : IPublisherService
     public Task<IEnumerable<Publisher>> GetAllAsync(Expression<Func<Publisher, bool>>? expression = null,
         PaginationParameters? parameters = null)
     {
-        return Task.FromResult(_publisherRepository.GetAll(expression).ToPaged(parameters));
+        return Task.FromResult(_publisherRepository.GetAll(expression, false).ToPaged(parameters));
     }
 }
