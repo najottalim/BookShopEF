@@ -4,5 +4,7 @@ public enum Language
 {
     Uz,
     Ru, 
-    En
+    En,
+    Az,
+    Kz
 }

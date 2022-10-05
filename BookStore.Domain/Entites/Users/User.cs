@@ -6,14 +6,14 @@ namespace BookStore.Domain.Entites.Users;
 
 public class User : Auditable
 {
-    public string FirstName { get; set; }
+    public string FirstName { get; set; } = null!;
     
-    public string LastName { get; set; }
+    public string LastName { get; set; } = null!;
     
     [Phone, MaxLength(9)]
-    public string Phone { get; set; }
+    public string Phone { get; set; } = null!;
     
-    public string Password { get; set; }
+    public string Password { get; set; } = null!;
     
     public UserRole UserRole { get; set; }
 }

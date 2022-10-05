@@ -1,17 +1,14 @@
 using System.ComponentModel.DataAnnotations;
-using BookStore.Domain.Enums;
 
 namespace BookStore.Service.DTOs.Users;
 
 public class UserForCreationDto
 {
-    
-    public string FirstName { get; set; }
-    
-    public string LastName { get; set; }
-    
-    [Phone, MaxLength(9)]
-    public string Phone { get; set; }
-    
-    public string Password { get; set; }
+    [Required] public string FirstName { get; set; } = null!;
+
+    [Required] public string LastName { get; set; } = null!;
+
+    [Phone] [MaxLength(9)] [Required] public string Phone { get; set; } = null!;
+
+    [Required] public string Password { get; set; } = null!;
 }

@@ -7,6 +7,8 @@ namespace BookStore.Service.Interfaces;
 
 public interface IUserService
 {
+    Task<string> LoginAsync(string login, string password);
+    
     Task<User> CreateAsync(UserForCreationDto dto);
     Task<User> UpdateAsync(int id, UserForUpdateDto dto);
     Task<bool> DeleteAsync(Expression<Func<User, bool>> expression);

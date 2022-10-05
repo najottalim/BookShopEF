@@ -6,13 +6,12 @@ using BookStore.Data.IRepositories;
 using BookStore.Data.Repositories;
 using BookStore.Domain.Commons;
 using BookStore.Domain.Entites.Books;
-using BookStore.Domain.Entites.Publishers;
 using BookStore.Domain.Enums;
 using BookStore.Service.DTOs.Books;
 using BookStore.Service.Exceptions;
 using BookStore.Service.Extensions;
+using BookStore.Service.Helpers;
 using BookStore.Service.Interfaces;
-using BookStore.Service.Mappers;
 
 namespace BookStore.Service.Services;
 
@@ -46,7 +45,7 @@ public class BookService : IBookService
         var book = await _bookRepository.CreateAsync(mapped);
         await _dbContext.SaveChangesAsync();
 
-        return book;
+        return book.SetLocalization(HttpContextHelper.Localization);
     }
 
     public async Task<Book> UpdateAsync(int id, BookForUpdateDto dto)
@@ -56,9 +55,15 @@ public class BookService : IBookService
         if (book is null)
             throw new HttpStatusCodeException(HttpStatusCode.NotFound, "Book not found!");
 
-        if (!string.IsNullOrEmpty(dto.Title)) 
-            book.Title = dto.Title;
+        if (!string.IsNullOrEmpty(dto.NameUz)) 
+            book.NameUz = dto.NameUz;
+        
+        if (!string.IsNullOrEmpty(dto.NameRu)) 
+            book.NameRu = dto.NameRu;
 
+        if (!string.IsNullOrEmpty(dto.NameEn))
+            book.NameEn = dto.NameEn;
+        
         if (dto.Price is not null)
             book.Price = (int)dto.Price;
 
@@ -73,7 +78,7 @@ public class BookService : IBookService
         book = await _bookRepository.UpdateAsync(book);
         await _dbContext.SaveChangesAsync();
         
-        return book;
+        return book.SetLocalization(HttpContextHelper.Localization);
     }
     
     public async Task<bool> DeleteAsync(Expression<Func<Book, bool>> expression)
@@ -92,15 +97,20 @@ public class BookService : IBookService
     public async Task<Book?> GetAsync(Expression<Func<Book, bool>> expression)
     {
         var book = await _bookRepository.GetAsync(expression);
-        
-        return book != null && book.State != ItemState.Deleted ? book : null;
+
+        return book == null || book.State == ItemState.Deleted
+            ? null
+            : book.SetLocalization(HttpContextHelper.Localization);
     }
 
     public Task<IEnumerable<Book>> GetAllAsync(Expression<Func<Book, bool>>? expression = null,
         PaginationParameters? parameters = null)
     {
-        return Task.FromResult(_bookRepository.GetAll(expression, false)
+        return Task.FromResult(_bookRepository
+            .GetAll(expression, false)
             .Where(p => p.State != ItemState.Deleted)
-            .ToPaged(parameters));
+            .ToPagedAsEnumerable(parameters)
+            .Select(book => book.SetLocalization(HttpContextHelper.Localization))
+        );
     }
 }
