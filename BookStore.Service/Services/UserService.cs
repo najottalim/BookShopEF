@@ -6,8 +6,10 @@ using BookStore.Data.IRepositories;
 using BookStore.Data.Repositories;
 using BookStore.Domain.Commons;
 using BookStore.Domain.Entites.Users;
+using BookStore.Domain.Enums;
 using BookStore.Service.DTOs.Users;
 using BookStore.Service.Exceptions;
+using BookStore.Service.Extensions;
 using BookStore.Service.Interfaces;
 
 namespace BookStore.Service.Services;
@@ -40,9 +42,11 @@ public class UserService : IUserService
         return _authManager.CreateToken(user);
     }
 
-    public async Task<User> CreateAsync(UserForCreationDto dto)
+    public async Task<User> CreateAsync(UserForCreationDto dto, UserRole role = UserRole.Customer)
     {
-        var user = _mapper.Map<User>(dto); 
+        var user = _mapper.Map<User>(dto);
+        user.UserRole = role;
+        user.CreatedAt = DateTime.UtcNow;
         
         user = await _userRepository.CreateAsync(user);
         await _dbContext.SaveChangesAsync();
@@ -62,11 +66,12 @@ public class UserService : IUserService
 
     public Task<User?> GetAsync(Expression<Func<User, bool>> expression)
     {
-        throw new NotImplementedException();
+        return _userRepository.GetAsync(expression);
     }
 
     public Task<IEnumerable<User>> GetAllAsync(Expression<Func<User, bool>>? expression = null, PaginationParameters? parameters = null)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IEnumerable<User>>(_userRepository.GetAll(expression, false)
+            .ToPagedAsQueryable(parameters));
     }
 }

@@ -4,6 +4,7 @@ using BookStore.Domain.Entites.Books;
 using BookStore.Service.DTOs.Books;
 using BookStore.Service.Exceptions;
 using BookStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.Api.Controllers;
@@ -18,7 +19,7 @@ public class BooksController : ControllerBase
         _bookService = bookService;
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}"), Authorize]
     public async Task<ActionResult<Book?>> Get([FromRoute]int id)
     {
         return Ok(await _bookService.GetAsync(book => book.Id == id));
@@ -39,13 +40,13 @@ public class BooksController : ControllerBase
         return Ok(await _bookService.GetAllAsync());
     }
 
-    [HttpPost]
+    [HttpPost, Authorize(Roles = "Admin,SuperAdmin")]
     public async Task<ActionResult<Book>> Create(BookForCreationDto bookForCreationDto)
     {
         return Ok(await _bookService.CreateAsync(bookForCreationDto));
     }
 
-    [HttpDelete]
+    [HttpDelete, Authorize]
     public async Task<ActionResult<bool>> Delete([FromQuery]int? id, [FromQuery] int? year)
     {
         if (id is null && year is null || id is not null && year is not null)

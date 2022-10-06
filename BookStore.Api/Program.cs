@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("HerokuPostgres");
+var connectionString = builder.Configuration.GetDbConnectionString("HerokuPostgres");
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -21,6 +21,8 @@ builder.Services.AddSwaggerGen();
 
 // Custom Services
 builder.Services.AddMyCustomServices();
+builder.Services.AddSwaggerAuthorization();
+builder.Services.AddJwtService(builder.Configuration);
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 var app = builder.Build();
@@ -37,7 +39,7 @@ HttpContextHelper.Accessor = app.Services.GetRequiredService<IHttpContextAccesso
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
-// app.UseAuthentication();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

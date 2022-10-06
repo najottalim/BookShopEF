@@ -69,9 +69,9 @@ public class PublisherService : IPublisherService
         PaginationParameters? parameters = null)
     {
         var publishers = _publisherRepository.GetAll(expression, false)
-            .ToPagedAsEnumerable(parameters)
+            .ToPagedAsQueryable(parameters)
             .Select(publisher => publisher.SetLocalization(HttpContextHelper.Localization));
 
-        return Task.FromResult(publishers);
+        return Task.FromResult<IEnumerable<Publisher>>(publishers);
     }
 }

@@ -15,7 +15,6 @@ public class AuthManager : IAuthManager
     private readonly string _audience;
     private readonly double _expire;
     
-
     public AuthManager(IConfiguration configuration)
     {
         _key = configuration.GetSection("Jwt:Key").Value!;

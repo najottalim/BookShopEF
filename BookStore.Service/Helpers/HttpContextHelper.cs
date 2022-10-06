@@ -17,4 +17,6 @@ public class HttpContextHelper
             ? result
             : Localization.Uz;
 
+    public static int UserId => int.Parse(Accessor.HttpContext.User.FindFirst("Id")?.Value ?? "0");
+
 }
